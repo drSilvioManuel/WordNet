@@ -1,31 +1,76 @@
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
+import edu.princeton.cs.algs4.Bag;
+import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 
 
 public class WordNet {
 
+	private final int V;
+	private final Digraph DG;
+	private final Map<String, List<Integer>> mapper;
+	
 	/** 
 	 * constructor takes the name of the two input files 
 	 */
 	public WordNet(String synsets, String hypernyms) {
-		String[] lSynsets = new In(synsets).readAllLines();
-		String[] lHypernyms = new In(hypernyms).readAllLines();
 		
+		String contentSynset = new In(synsets).readAll();
+		String contentHypernym = new In(hypernyms).readAll();
+		
+		StringTokenizer lineTokensSynset = new StringTokenizer(contentSynset);
+		StringTokenizer lineTokensHypernym = new StringTokenizer(contentHypernym);
+		
+		V = lineTokensSynset.countTokens();
+		DG = new Digraph(V);
+		mapper = new HashMap<String, List<Integer>>();
+		if (V != lineTokensHypernym.countTokens()) throw new IllegalArgumentException();
+		
+		while (lineTokensSynset.hasMoreTokens()) {
+			
+			String lineSynset = lineTokensSynset.nextToken();
+			String lineHypernym = lineTokensHypernym.nextToken();
+			
+			StringTokenizer tokenizerSynset = new StringTokenizer(lineSynset, ",");
+			StringTokenizer tokenizerHypernym = new StringTokenizer(lineHypernym, ",");
+			
+			int id = Integer.parseInt(tokenizerSynset.nextToken());
+			int _id = Integer.parseInt(tokenizerHypernym.nextToken());
+			
+			if (id != _id) throw new IllegalArgumentException();
+			
+			StringTokenizer wordTokenizer = new StringTokenizer(tokenizerSynset.nextToken());
+			while (wordTokenizer.hasMoreTokens()) {
+				String word = wordTokenizer.nextToken();
+				if (mapper.containsKey(word)) mapper.get(word).add(id);
+				else mapper.put(word, Arrays.asList(id));
+			}
+			StringTokenizer hypernymTokenizer = new StringTokenizer(tokenizerHypernym.nextToken());
+			while (hypernymTokenizer.hasMoreTokens()) {
+				int hypernym = Integer.parseInt(hypernymTokenizer.nextToken());
+				DG.addEdge(id, hypernym);
+			}
+	     }
 	}
 
 	/**
 	 * returns all WordNet nouns
 	 */
 	public Iterable<String> nouns() {
-		throw new RuntimeException();
+		return mapper.keySet();
 	}
 
 	/** 
 	 * is the word a WordNet noun? 
 	 */
 	public boolean isNoun(String word) {
-		throw new RuntimeException();
+		return mapper.containsKey(word);
 	}
 
 	/** 
@@ -48,10 +93,31 @@ public class WordNet {
 
 	}
 	
-	private static class Node {
+	private class Node {
 		int synsetId;
 		String[] synset;
-		String gloss;
+		int hash;
+		
+		@Override
+		public int hashCode() {
+			int hashCode = hash;
+			if (hashCode == 0) {
+				for(int i = 0; i < synset.length; i++){
+					hashCode = 31*hashCode + synset[i].hashCode();
+				}
+				hash = hashCode;
+			}
+			return hashCode;
+		}
+		
+		@Override
+		public boolean equals(Object that) {
+			if (that == null) return false;
+			if (this.getClass() != that.getClass()) return false;
+			Node thatNode =  (Node)that;
+			if (hashCode() == thatNode.hashCode() && synsetId == thatNode.synsetId) return true;
+			return false;
+		}
 	}
 
 }
