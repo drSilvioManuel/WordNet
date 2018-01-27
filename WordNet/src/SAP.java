@@ -3,6 +3,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import edu.princeton.cs.algs4.Bag;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Queue;
@@ -18,6 +19,7 @@ public class SAP {
 	 * constructor takes a digraph (not necessarily a DAG)
 	 */
 	public SAP(Digraph G) {
+		throwExceptionIfWrong(G);
 		graph = new Digraph(G);
 		
 	}
@@ -26,6 +28,7 @@ public class SAP {
 	 * length of shortest ancestral path between v and w; -1 if no such path
 	 */
 	public int length(int v, int w) {
+		throwExceptionIfWrong(v, w);
 		return retrieveInstance(v, w).getLength();
 	}
 
@@ -34,6 +37,7 @@ public class SAP {
 	 * path; -1 if no such path
 	 */
 	public int ancestor(int v, int w) {
+		throwExceptionIfWrong(v, w);
 		return retrieveInstance(v, w).getAncestor();
 	}
 
@@ -42,6 +46,8 @@ public class SAP {
 	 * in w; -1 if no such path
 	 */
 	public int length(Iterable<Integer> v, Iterable<Integer> w) {
+		throwExceptionIfWrong(v);
+		throwExceptionIfWrong(w);
 		return retrieveInstance(v, w).getLength();
 	}
 
@@ -50,6 +56,8 @@ public class SAP {
 	 * such path
 	 */
 	public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
+		throwExceptionIfWrong(v);
+		throwExceptionIfWrong(w);
 		return retrieveInstance(v, w).getAncestor();
 	}
 
@@ -69,6 +77,24 @@ public class SAP {
 			int ancestor = sap.ancestor(v, w);
 			StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
 		}
+	}
+	
+	private void throwExceptionIfWrong(Iterable<Integer> args) {
+		if (args == null)  throw new IllegalArgumentException();
+		for (int arg : args) {
+			if (arg < 0 || arg > graph.V() - 1) throw new IllegalArgumentException();
+		}
+	}
+	
+	private void throwExceptionIfWrong(int ...args) {
+		Bag<Integer> bag = new Bag<>();
+		for (int arg : args) bag.add(arg);
+		
+		throwExceptionIfWrong(bag);
+	}
+	
+	private void throwExceptionIfWrong(Digraph G) {
+		if (G == null)  throw new IllegalArgumentException();
 	}
 	
 	private BFS retrieveInstance(int v, int w) {

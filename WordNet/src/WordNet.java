@@ -21,6 +21,7 @@ public class WordNet {
 	 * constructor takes the name of the two input files
 	 */
 	public WordNet(String synsets, String hypernyms) {
+		throwExceptionIfNull(synsets, hypernyms);
 
 		String contentSynset = new In(synsets).readAll();
 		String contentHypernym = new In(hypernyms).readAll();
@@ -76,6 +77,7 @@ public class WordNet {
 	 * is the word a WordNet noun?
 	 */
 	public boolean isNoun(String word) {
+		throwExceptionIfNull(word);
 		return mapper.containsKey(word);
 	}
 
@@ -83,6 +85,7 @@ public class WordNet {
 	 * distance between nounA and nounB (defined below)
 	 */
 	public int distance(String nounA, String nounB) {
+		throwExceptionIfNull(nounA, nounB);
 		return sap.length(mapper.get(nounA), mapper.get(nounB));
 	}
 
@@ -91,11 +94,16 @@ public class WordNet {
 	 * nounA and nounB in a shortest ancestral path (defined below)
 	 */
 	public String sap(String nounA, String nounB) {
+		throwExceptionIfNull(nounA, nounB);
 		return mapperReverced.get(sap.ancestor(mapper.get(nounA), mapper.get(nounB)));
 	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	private static void throwExceptionIfNull(Object ...args) {
+		for (Object arg : args) if (arg == null) throw new IllegalArgumentException();
 	}
 }
