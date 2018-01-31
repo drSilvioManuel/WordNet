@@ -11,17 +11,17 @@ import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
 
 public class SAP {
-	
-	private final Map<String, BFS> pull = new HashMap<>();
+
+	private final Map<String, BFS> pull = new HashMap<String, BFS>();
 	private final Digraph graph;
-	
+
 	/**
 	 * constructor takes a digraph (not necessarily a DAG)
 	 */
 	public SAP(Digraph G) {
 		throwExceptionIfWrong(G);
 		graph = new Digraph(G);
-		
+
 	}
 
 	/**
@@ -61,12 +61,7 @@ public class SAP {
 		return retrieveInstance(v, w).getAncestor();
 	}
 
-	
-
-	
-
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		In in = new In(args[0]);
 		Digraph G = new Digraph(in);
 		SAP sap = new SAP(G);
@@ -78,96 +73,108 @@ public class SAP {
 			StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
 		}
 	}
-	
+
 	private void throwExceptionIfWrong(Iterable<Integer> args) {
-		if (args == null)  throw new IllegalArgumentException();
+		if (args == null)
+			throw new IllegalArgumentException();
 		for (int arg : args) {
-			if (arg < 0 || arg > graph.V() - 1) throw new IllegalArgumentException();
+			if (arg < 0 || arg > graph.V() - 1)
+				throw new IllegalArgumentException();
 		}
 	}
-	
-	private void throwExceptionIfWrong(int ...args) {
-		Bag<Integer> bag = new Bag<>();
-		for (int arg : args) bag.add(arg);
-		
+
+	private void throwExceptionIfWrong(int... args) {
+		Bag<Integer> bag = new Bag<Integer>();
+		for (int arg : args)
+			bag.add(arg);
+
 		throwExceptionIfWrong(bag);
 	}
-	
+
 	private void throwExceptionIfWrong(Digraph G) {
-		if (G == null)  throw new IllegalArgumentException();
+		if (G == null)
+			throw new IllegalArgumentException();
 	}
-	
+
 	private BFS retrieveInstance(int v, int w) {
 		String key;
-		if (v < w) key = Integer.toString(v) + Integer.toString(w);
-		else key = Integer.toString(w) + Integer.toString(v);
-		if (!pull.containsKey(key)) pull.put(key, new BFS(v, w));
-		
+		if (v < w)
+			key = Integer.toString(v) + "_" + Integer.toString(w);
+		else
+			key = Integer.toString(w) + "_" + Integer.toString(v);
+		if (!pull.containsKey(key))
+			pull.put(key, new BFS(v, w));
+
 		return pull.get(key);
 	}
-	
-	private BFS retrieveInstance(Iterable<Integer>vs, Iterable<Integer>ws) {
+
+	private BFS retrieveInstance(Iterable<Integer> vs, Iterable<Integer> ws) {
 		String key;
-		if (vs.hashCode() < ws.hashCode())key = Integer.toString(vs.hashCode()) + Integer.toString(ws.hashCode());
-		else key = Integer.toString(ws.hashCode()) + Integer.toString(vs.hashCode());
-		if (!pull.containsKey(key)) pull.put(key, new BFS(vs, ws));
-		
+		if (vs.hashCode() < ws.hashCode())
+			key = Integer.toString(vs.hashCode()) + Integer.toString(ws.hashCode());
+		else
+			key = Integer.toString(ws.hashCode()) + Integer.toString(vs.hashCode());
+		if (!pull.containsKey(key))
+			pull.put(key, new BFS(vs, ws));
+
 		return pull.get(key);
 	}
-	
+
 	private class BFS {
- 
-		boolean[] marked1 = new boolean[graph.V()];// marked[v] = is there an s->v path?
-		int[] distTo1 = new int[graph.V()];// edgeTo[v] = last edge on shortest s->v path
-		int[] edgeTo1 = new int[graph.V()];// distTo[v] = length of shortest s->v path
+
+		boolean[] marked1 = new boolean[graph.V()];// marked[v] = is there an
+													// s->v path?
+		int[] distTo1 = new int[graph.V()];// edgeTo[v] = last edge on shortest
+											// s->v path
+		int[] edgeTo1 = new int[graph.V()];// distTo[v] = length of shortest
+											// s->v path
 		Queue<Integer> q1 = new Queue<Integer>();
-		
+
 		boolean[] marked2 = new boolean[graph.V()];
 		int[] distTo2 = new int[graph.V()];
 		int[] edgeTo2 = new int[graph.V()];
 		Queue<Integer> q2 = new Queue<Integer>();
-		
+
 		final int ancestor;
-		
-		final Set<Integer> vertices = new HashSet<>();
-		
-		BFS (int v, int w) {
-	        marked1[v] = true;
+
+		final Set<Integer> vertices = new HashSet<Integer>();
+
+		BFS(int v, int w) {
+			marked1[v] = true;
 			distTo1[v] = 0;
 			q1.enqueue(v);
-			
-	        
-	        marked2[w] = true;
+
+			marked2[w] = true;
 			distTo2[w] = 0;
 			q2.enqueue(w);
-			
+
 			ancestor = searchOfShortestPath();
 		}
-		
-		BFS (Iterable<Integer> vs, Iterable<Integer> ws) {
+
+		BFS(Iterable<Integer> vs, Iterable<Integer> ws) {
 			for (int v : vs) {
 				marked1[v] = true;
 				distTo1[v] = 0;
 				q1.enqueue(v);
 			}
-	        
+
 			for (int w : ws) {
 				marked2[w] = true;
 				distTo2[w] = 0;
 				q2.enqueue(w);
 			}
-			
+
 			ancestor = searchOfShortestPath();
 		}
-		
+
 		int getAncestor() {
 			return ancestor;
 		}
-		
+
 		int getLength() {
 			return vertices.size();
 		}
-		
+
 		int searchOfShortestPath() {
 			int ancestor = -1;
 
@@ -176,11 +183,12 @@ public class SAP {
 				int v2 = q2.dequeue();
 
 				ancestor = findShortestPath(q1, v1, marked1, edgeTo1, distTo1);
-				if (-1 == ancestor) ancestor = findShortestPath(q2, v2, marked2, edgeTo2, distTo2);
+				if (-1 == ancestor)
+					ancestor = findShortestPath(q2, v2, marked2, edgeTo2, distTo2);
 			}
 			return ancestor;
 		}
-		
+
 		/**
 		 * 
 		 * @param q
@@ -198,8 +206,10 @@ public class SAP {
 					distTo[w] = distTo[v] + 1;
 					marked[w] = true;
 					q.enqueue(w);
-					if (vertices.contains(w)) pathFound = w;
-					else vertices.add(w);
+					if (vertices.contains(w))
+						pathFound = w;
+					else
+						vertices.add(w);
 				}
 			}
 			return pathFound;

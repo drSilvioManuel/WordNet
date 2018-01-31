@@ -1,11 +1,9 @@
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import edu.princeton.cs.algs4.Bag;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 
@@ -13,8 +11,8 @@ public class WordNet {
 
 	private final int V;
 	private final Digraph DG;
-	private final Map<String, List<Integer>> mapper = new HashMap<>();
-	private final Map<Integer, String> mapperReverced = new HashMap<>();
+	private final Map<String, List<Integer>> mapper = new HashMap<String, List<Integer>>();
+	private final Map<Integer, String> mapperReverced = new HashMap<Integer, String>();
 	private final SAP sap;
 
 	/**
@@ -26,13 +24,13 @@ public class WordNet {
 		String contentSynset = new In(synsets).readAll();
 		String contentHypernym = new In(hypernyms).readAll();
 
-		StringTokenizer lineTokensSynset = new StringTokenizer(contentSynset);
-		StringTokenizer lineTokensHypernym = new StringTokenizer(contentHypernym);
+		StringTokenizer lineTokensSynset = new StringTokenizer(contentSynset, "\n");
+		StringTokenizer lineTokensHypernym = new StringTokenizer(contentHypernym, "\n");
 
 		V = lineTokensSynset.countTokens();
 		DG = new Digraph(V);
 		if (V != lineTokensHypernym.countTokens())
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("synset: " + V + "; hypernym: " + lineTokensHypernym.countTokens());
 
 		while (lineTokensSynset.hasMoreTokens()) {
 
@@ -55,11 +53,11 @@ public class WordNet {
 				if (mapper.containsKey(word))
 					mapper.get(word).add(id);
 				else
-					mapper.put(word, Arrays.asList(id));
+					mapper.put(word, new ArrayList<Integer>(){{add(id);}});
 			}
-			StringTokenizer hypernymTokenizer = new StringTokenizer(tokenizerHypernym.nextToken());
-			while (hypernymTokenizer.hasMoreTokens()) {
-				int hypernym = Integer.parseInt(hypernymTokenizer.nextToken());
+
+			while (tokenizerHypernym.hasMoreTokens()) {
+				int hypernym = Integer.parseInt(tokenizerHypernym.nextToken());
 				DG.addEdge(id, hypernym);
 			}
 		}
@@ -102,8 +100,10 @@ public class WordNet {
 		// TODO Auto-generated method stub
 
 	}
-	
-	private static void throwExceptionIfNull(Object ...args) {
-		for (Object arg : args) if (arg == null) throw new IllegalArgumentException();
+
+	private static void throwExceptionIfNull(Object... args) {
+		for (Object arg : args)
+			if (arg == null)
+				throw new IllegalArgumentException();
 	}
 }

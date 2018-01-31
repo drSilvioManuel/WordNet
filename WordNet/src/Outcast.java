@@ -1,6 +1,6 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
@@ -27,19 +27,17 @@ public class Outcast {
 	 */
 	public String outcast(String[] nouns) {
 		throwExceptionIfNull(nouns);
-		List<Integer> distances = new ArrayList<>();
+		List<Integer> distances = new ArrayList<Integer>();
 		for (int i = 0; i < nouns.length; i++) {
 			distances.add(i, 0);
 			for (int j = 0; j < nouns.length; j++) {
 				if (i == j)
 					continue;
-				distances.add(i, distances.get(i) + wordNet.distance(nouns[i], nouns[j]));
+				distances.set(i, distances.get(i) + wordNet.distance(nouns[i], nouns[j]));
 			}
 		}
-		int index = IntStream
-			.range(0, distances.size())
-			.reduce((i, j) -> distances.get(i) < distances.get(j) ? j : i)
-			.getAsInt();
+		
+		int index = distances.indexOf(Collections.max(distances));
 		return nouns[index];
 	}
 
@@ -54,6 +52,7 @@ public class Outcast {
 	}
 
 	private static void throwExceptionIfNull(Object arg) {
-		if (arg == null) throw new IllegalArgumentException();
+		if (arg == null)
+			throw new IllegalArgumentException();
 	}
 }
