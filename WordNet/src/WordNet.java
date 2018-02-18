@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,8 +10,6 @@ import edu.princeton.cs.algs4.In;
 
 public class WordNet {
 
-	private final int V;
-	private final Digraph DG;
 	private final Map<String, List<Integer>> mapper = new HashMap<String, List<Integer>>();
 	private final Map<Integer, String> mapperReverced = new HashMap<Integer, String>();
 	private final SAP sap;
@@ -27,8 +26,8 @@ public class WordNet {
 		StringTokenizer lineTokensSynset = new StringTokenizer(contentSynset, "\n");
 		StringTokenizer lineTokensHypernym = new StringTokenizer(contentHypernym, "\n");
 
-		V = lineTokensSynset.countTokens();
-		DG = new Digraph(V);
+		int V = lineTokensSynset.countTokens();
+		Digraph DG = new Digraph(V);
 		if (V != lineTokensHypernym.countTokens())
 			throw new IllegalArgumentException("synset: " + V + "; hypernym: " + lineTokensHypernym.countTokens());
 
@@ -53,7 +52,7 @@ public class WordNet {
 				if (mapper.containsKey(word))
 					mapper.get(word).add(id);
 				else
-					mapper.put(word, new ArrayList<Integer>(){{add(id);}});
+					mapper.put(word, new ArrayList<Integer>(Arrays.asList(id)));
 			}
 
 			while (tokenizerHypernym.hasMoreTokens()) {

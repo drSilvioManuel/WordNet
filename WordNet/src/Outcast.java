@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
@@ -27,7 +26,7 @@ public class Outcast {
 	 */
 	public String outcast(String[] nouns) {
 		throwExceptionIfNull(nouns);
-		List<Integer> distances = new ArrayList<Integer>();
+		ArrayList<Integer> distances = new ArrayList<Integer>();
 		for (int i = 0; i < nouns.length; i++) {
 			distances.add(i, 0);
 			for (int j = 0; j < nouns.length; j++) {
