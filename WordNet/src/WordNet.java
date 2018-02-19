@@ -10,99 +10,90 @@ import edu.princeton.cs.algs4.In;
 
 public class WordNet {
 
-	private final Map<String, List<Integer>> mapper = new HashMap<String, List<Integer>>();
-	private final Map<Integer, String> mapperReverced = new HashMap<Integer, String>();
-	private final SAP sap;
+    private final Map<String, List<Integer>> mapper = new HashMap<String, List<Integer>>();
+    private final Map<Integer, String> mapperReverced = new HashMap<Integer, String>();
+    private final SAP sap;
 
-	/**
-	 * constructor takes the name of the two input files
-	 */
-	public WordNet(String synsets, String hypernyms) {
-		throwExceptionIfNull(synsets, hypernyms);
+    /**
+     * constructor takes the name of the two input files
+     */
+    public WordNet(String synsets, String hypernyms) {
+        throwExceptionIfNull(synsets, hypernyms);
 
-		String contentSynset = new In(synsets).readAll();
-		String contentHypernym = new In(hypernyms).readAll();
+        String contentSynset = new In(synsets).readAll();
+        StringTokenizer lineTokensSynset = new StringTokenizer(contentSynset, "\n");
 
-		StringTokenizer lineTokensSynset = new StringTokenizer(contentSynset, "\n");
-		StringTokenizer lineTokensHypernym = new StringTokenizer(contentHypernym, "\n");
+        int V = lineTokensSynset.countTokens();
+        Digraph DG = new Digraph(V);
+        while (lineTokensSynset.hasMoreTokens()) {
+            String lineSynset = lineTokensSynset.nextToken();
+            StringTokenizer tokenizerSynset = new StringTokenizer(lineSynset, ",");
+            int id = Integer.parseInt(tokenizerSynset.nextToken());
+            StringTokenizer wordTokenizer = new StringTokenizer(tokenizerSynset.nextToken());
+            while (wordTokenizer.hasMoreTokens()) {
+                String word = wordTokenizer.nextToken();
+                mapperReverced.put(id, word);
+                if (mapper.containsKey(word))
+                    mapper.get(word).add(id);
+                else
+                    mapper.put(word, new ArrayList<Integer>(Arrays.asList(id)));
+            }
+        }
 
-		int V = lineTokensSynset.countTokens();
-		Digraph DG = new Digraph(V);
-		if (V != lineTokensHypernym.countTokens())
-			throw new IllegalArgumentException("synset: " + V + "; hypernym: " + lineTokensHypernym.countTokens());
+        String contentHypernym = new In(hypernyms).readAll();
+        StringTokenizer lineTokensHypernym = new StringTokenizer(contentHypernym, "\n");
+        while (lineTokensHypernym.hasMoreTokens()) {
+            String lineHypernym = lineTokensHypernym.nextToken();
+            StringTokenizer tokenizerHypernym = new StringTokenizer(lineHypernym, ",");
+            int id = Integer.parseInt(tokenizerHypernym.nextToken());
+            while (tokenizerHypernym.hasMoreTokens()) {
+                int hypernym = Integer.parseInt(tokenizerHypernym.nextToken());
+                DG.addEdge(id, hypernym);
+            }
+        }
+        sap = new SAP(DG);
+    }
 
-		while (lineTokensSynset.hasMoreTokens()) {
+    /**
+     * returns all WordNet nouns
+     */
+    public Iterable<String> nouns() {
+        return mapper.keySet();
+    }
 
-			String lineSynset = lineTokensSynset.nextToken();
-			String lineHypernym = lineTokensHypernym.nextToken();
+    /**
+     * is the word a WordNet noun?
+     */
+    public boolean isNoun(String word) {
+        throwExceptionIfNull(word);
+        return mapper.containsKey(word);
+    }
 
-			StringTokenizer tokenizerSynset = new StringTokenizer(lineSynset, ",");
-			StringTokenizer tokenizerHypernym = new StringTokenizer(lineHypernym, ",");
+    /**
+     * distance between nounA and nounB (defined below)
+     */
+    public int distance(String nounA, String nounB) {
+        throwExceptionIfNull(nounA, nounB);
+        return sap.length(mapper.get(nounA), mapper.get(nounB));
+    }
 
-			int id = Integer.parseInt(tokenizerSynset.nextToken());
-			int _id = Integer.parseInt(tokenizerHypernym.nextToken());
+    /**
+     * a synset (second field of synsets.txt) that is the common ancestor of
+     * nounA and nounB in a shortest ancestral path (defined below)
+     */
+    public String sap(String nounA, String nounB) {
+        throwExceptionIfNull(nounA, nounB);
+        return mapperReverced.get(sap.ancestor(mapper.get(nounA), mapper.get(nounB)));
+    }
 
-			if (id != _id)
-				throw new IllegalArgumentException();
+    public static void main(String[] args) {
+        // TODO Auto-generated method stub
 
-			StringTokenizer wordTokenizer = new StringTokenizer(tokenizerSynset.nextToken());
-			while (wordTokenizer.hasMoreTokens()) {
-				String word = wordTokenizer.nextToken();
-				mapperReverced.put(id, word);
-				if (mapper.containsKey(word))
-					mapper.get(word).add(id);
-				else
-					mapper.put(word, new ArrayList<Integer>(Arrays.asList(id)));
-			}
+    }
 
-			while (tokenizerHypernym.hasMoreTokens()) {
-				int hypernym = Integer.parseInt(tokenizerHypernym.nextToken());
-				DG.addEdge(id, hypernym);
-			}
-		}
-		sap = new SAP(DG);
-	}
-
-	/**
-	 * returns all WordNet nouns
-	 */
-	public Iterable<String> nouns() {
-		return mapper.keySet();
-	}
-
-	/**
-	 * is the word a WordNet noun?
-	 */
-	public boolean isNoun(String word) {
-		throwExceptionIfNull(word);
-		return mapper.containsKey(word);
-	}
-
-	/**
-	 * distance between nounA and nounB (defined below)
-	 */
-	public int distance(String nounA, String nounB) {
-		throwExceptionIfNull(nounA, nounB);
-		return sap.length(mapper.get(nounA), mapper.get(nounB));
-	}
-
-	/**
-	 * a synset (second field of synsets.txt) that is the common ancestor of
-	 * nounA and nounB in a shortest ancestral path (defined below)
-	 */
-	public String sap(String nounA, String nounB) {
-		throwExceptionIfNull(nounA, nounB);
-		return mapperReverced.get(sap.ancestor(mapper.get(nounA), mapper.get(nounB)));
-	}
-
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
-
-	private static void throwExceptionIfNull(Object... args) {
-		for (Object arg : args)
-			if (arg == null)
-				throw new IllegalArgumentException();
-	}
+    private static void throwExceptionIfNull(Object... args) {
+        for (Object arg : args)
+            if (arg == null)
+                throw new IllegalArgumentException();
+    }
 }
